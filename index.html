@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab 7 JS</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f7f7f7;
+        }
+
+        .wrapper {
+            width: 420px;
+            margin-left: 80px;
+            margin-right: auto;
+            margin-top: 50px;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
+        }
+
+        h2 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .block {
+            margin-bottom: 35px;
+        }
+
+        input {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+
+        button {
+            padding: 10px 14px;
+            border: none;
+            border-radius: 8px;
+            background: #2d6cdf;
+            color: white;
+            cursor: pointer;
+            margin-right: 8px;
+        }
+
+        button:hover {
+            background: #1f57bb;
+        }
+
+        #countyResult {
+            margin-top: 10px;
+            font-weight: bold;
+            color: #222;
+        }
+
+        #formResult {
+            margin-top: 10px;
+            color: red;
+            font-weight: bold;
+        }
+
+        #boxArea {
+            width: 100%;
+            height: 120px;
+            border: 1px solid #999;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+            background: #fafafa;
+            margin-bottom: 12px;
+        }
+
+        #elid {
+            width: 80px;
+            height: 80px;
+            background: red;
+            position: absolute;
+            top: 20px;
+            left: 0;
+            transition: left 0.5s;
+            border-radius: 6px;
+        }
+
+        .buttons {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+
+    <div class="block">
+        <h2>Пошук коду округу</h2>
+        <input type="text" id="countyInput" placeholder="Baldwin County, Alabama">
+        <button id="findButton">Знайти код</button>
+        <div id="countyResult"></div>
+    </div>
+
+    <div class="block">
+        <h2>Форма</h2>
+        <form id="myForm">
+            <input type="text" id="first_name" placeholder="Ім'я">
+            <input type="text" id="last_name" placeholder="Прізвище">
+            <input type="email" id="email" placeholder="Email">
+            <button type="submit">Відправити</button>
+        </form>
+        <div id="formResult"></div>
+    </div>
+
+    <div class="block">
+        <h2>Анімація</h2>
+        <div id="boxArea">
+            <div id="elid"></div>
+        </div>
+
+        <div class="buttons">
+            <button id="leftButton">Вліво</button>
+            <button id="rightButton">Вправо</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    let name = "Василь";
+    let admin = name;
+    console.log(admin);
+
+    let counties = [];
+
+    async function loadCounties() {
+        let response = await fetch("https://api.census.gov/data/2020/acs/acs5/profile?get=NAME&for=county:*");
+        let data = await response.json();
+
+        for (let i = 1; i < data.length; i++) {
+            counties.push({
+                name: data[i][0],
+                code: data[i][1] + data[i][2]
+            });
+        }
+    }
+
+    function getCountyCode(countyName) {
+        for (let i = 0; i < counties.length; i++) {
+            if (counties[i].name.toLowerCase() === countyName.toLowerCase()) {
+                return counties[i].code;
+            }
+        }
+        return "Не знайдено";
+    }
+
+    document.getElementById("findButton").onclick = function () {
+        let countyName = document.getElementById("countyInput").value;
+        let code = getCountyCode(countyName);
+        document.getElementById("countyResult").innerText = code;
+        console.log(code);
+    };
+
+    loadCounties();
+
+    document.getElementById("myForm").onsubmit = function (event) {
+        event.preventDefault();
+
+        let firstName = document.getElementById("first_name").value;
+        let lastName = document.getElementById("last_name").value;
+        let email = document.getElementById("email").value;
+
+        if (firstName === "" || lastName === "" || email === "") {
+            document.getElementById("formResult").innerText = "Заповніть всі поля!";
+            alert("Заповніть всі поля!");
+        } else {
+            document.getElementById("formResult").innerText = "";
+            alert("Ім'я: " + firstName + "\nПрізвище: " + lastName + "\nEmail: " + email);
+        }
+    };
+
+    let position = 0;
+
+    document.getElementById("leftButton").onclick = function () {
+        position = position - 100;
+        if (position < 0) {
+            position = 0;
+        }
+        document.getElementById("elid").style.left = position + "px";
+    };
+
+    document.getElementById("rightButton").onclick = function () {
+        position = position + 100;
+        if (position > 320) {
+            position = 320;
+        }
+        document.getElementById("elid").style.left = position + "px";
+    };
+</script>
+
+</body>
+</html>
